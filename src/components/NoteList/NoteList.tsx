@@ -15,20 +15,26 @@ export default function NoteList({
   notes,
 }: NoteListProps) {
   const queryClient = useQueryClient();
+
   const { mutate } = useMutation({
     mutationFn: deleteNote,
-    onSuccess() {
-      queryClient.invalidateQueries();
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+      });
     },
-    onError() {
-      toast.error(
-        "Sorry! Something went wrong!!!",
-      );
+    onError: () => {
+      toast.error("Something went wrong");
     },
   });
+
+  if (!notes || notes.length === 0) {
+    return null;
+  }
+
   return (
     <ul className={css.list}>
-      {notes.map((note: Note) => (
+      {notes.map((note) => (
         <li
           className={css.listItem}
           key={note.id}
@@ -44,10 +50,9 @@ export default function NoteList({
               {note.tag}
             </span>
             <button
+              type="button"
               className={css.button}
-              onClick={() => {
-                mutate(note.id);
-              }}
+              onClick={() => mutate(note.id)}
             >
               Delete
             </button>
